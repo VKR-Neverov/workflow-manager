@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package workflow_manager;
+
+option go_package = "github.com/fidesy-pay/workflow-manager;workflow_manager";
+
+service WorkflowManager {
+  rpc ListFlows(ListFlowsRequest) returns (ListFlowsResponse);
+
+  rpc CreateRegistration(CreateRegistrationRequest) returns(FlowResponse);
+  rpc SetEmail(SetEmailRequest) returns(FlowResponse);
+  rpc ConfirmEmail(ConfirmEmailRequest) returns(FlowResponse);
+  rpc SetRegistrationCredentials(SetRegistrationCredentialsRequest) returns(FlowResponse);
+
+  // Create flow for restoring password
+  rpc CreateRestorePassword(CreateRestorePasswordRequest) returns(FlowResponse);
+  rpc SetPassword(SetPasswordRequest) returns(FlowResponse);
+}
+
+message ListFlowsRequest {
+  message Filter {
+    repeated string id_in = 1;
+  }
+
+  Filter filter = 1;
+  uint64 page = 2;
+  uint64 per_page = 3;
+}
+
+message ListFlowsResponse {
+  repeated FlowResponse flows = 1;
+}
+
+message FlowResponse {
+  string id = 1;
+  string type = 2;
+  string state = 3;
+}
+
+message CreateRegistrationRequest {}
+
+message SetEmailRequest {
+  string id = 1;
+  string email = 2;
+}
+
+message ConfirmEmailRequest {
+  string id = 1;
+  string code = 2;
+}
+
+message SetRegistrationCredentialsRequest {
+  string id = 1;
+  string username = 2;
+  string password = 3;
+}
+
+message CreateRestorePasswordRequest {
+  string email = 1;
+}
+
+message SetPasswordRequest {
+  string id = 1;
+  string password = 2;
+}

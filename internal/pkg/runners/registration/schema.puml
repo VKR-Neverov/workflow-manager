@@ -1,0 +1,100 @@
+@startuml
+
+actor Client as client
+participant Frontend as frontend
+participant Facade as facade
+participant "Workflow Manager" as wm
+participant "Email Service" as email
+participant "Clients Service" as cs
+participant "Crypto Service" as crypto
+participant "Auth Service" as auth
+
+
+== CREATE ==
+
+client -> frontend: Клиент зашел на\nна страницу регистрации
+
+frontend -> facade: CreateRegistration
+facade -> wm: CreateRegistration\n
+
+wm --> facade
+facade --> frontend: Сохраняем ID процесса в куки
+frontend --> client
+
+== NEW ==
+
+== WAITING_EMAIL ==
+
+client -> frontend: клиент ввел email\nи нажал на кнопку
+
+frontend -> facade: SetEmail
+facade -> wm: SetEmail
+
+wm -> cs: ListClient\nполучаем список клиентов \nс данным email
+cs --> wm
+
+opt Клиент с таким email существует
+
+    wm --> facade
+    facade --> frontend
+    frontend --> client: Ошибка: email уже используется
+
+else Новый email
+
+    wm -> email: SendCode\nотправляем код подтверждения\n на почту
+    email --> wm
+    wm --> facade
+    facade --> frontend
+    frontend --> client:
+
+end
+
+
+
+== EMAIL_SET ==
+
+== WAITING_EMAIL_CONFIRMATION ==
+
+note right of facade: показываем страницу для ввода кода подтверждения
+
+client -> frontend: Клиент ввел код\nи нажал кнопку
+frontend -> facade: ConfirmEmail
+facade -> wm: ConfirmEmail
+wm -> email: ConfirmCode
+
+email --> wm
+wm --> facade
+facade --> frontend
+frontend --> client
+
+== EMAIL_CONFIRMED ==
+
+== WAITING_CREDENTIALS ==
+
+client -> frontend: Ввод имя пользователя и пароль
+frontend -> facade: SetCredentials
+facade -> wm: SetCredentials
+
+activate wm
+
+wm -> cs: CreateUser\nсоздаем пользователя
+cs --> wm
+
+wm -> crypto: CreateWallet\nсоздаем кошелек клиенту
+crypto --> wm
+
+wm -> auth: SignUp\nсохраняем данные в \nсервисе авторизации
+auth --> wm
+
+wm --> facade
+
+deactivate wm
+
+facade --> frontend
+frontend --> client
+
+== CREDENTIALS_SET ==
+
+== COMPLETED ==
+
+@enduml

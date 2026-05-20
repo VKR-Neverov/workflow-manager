@@ -1,0 +1,24 @@
+version: '3'
+
+networks:
+  zoo:
+    external: true
+
+services:
+  database-local:
+    container_name: workflow-manager-db-local
+    image: postgres
+    restart: always
+    networks:
+      - zoo
+    volumes:
+      - workflow-manager-db-local-volume:/var/lib/postgresql
+    ports:
+      - "28201:5432"
+    environment:
+      POSTGRES_USER: workflow-manager
+      POSTGRES_PASSWORD: workflow-manager
+      POSTGRES_DB: workflow-manager
+
+volumes:
+  workflow-manager-db-local-volume:
